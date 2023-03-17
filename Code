@@ -1,0 +1,52 @@
+String rollNo = rollNoTextField.getText();
+String fullName = fullNameTextField.getText();
+String className = classTextField.getText();
+String birthDate = birthDateFormattedTextField.getText();
+String address = addressTextArea.getText();
+String enrollmentDate = enrollmentDateFormattedTextField.getText();
+
+// Check that all fields are filled out
+if (rollNo.isEmpty() || fullName.isEmpty() || className.isEmpty() || birthDate.isEmpty() || address.isEmpty() || enrollmentDate.isEmpty()) {
+    JOptionPane.showMessageDialog(this, "Please fill out all fields.");
+    return;
+}
+
+// Check if Roll No already exists in the database
+try {
+    Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SCHOOL-DB", "username", "password");
+    PreparedStatement checkStmt = conn.prepareStatement("SELECT * FROM STUDENT-TABLE WHERE Roll_No = ?");
+    checkStmt.setString(1, rollNo);
+    ResultSet rs = checkStmt.executeQuery();
+    
+    if (rs.next()) {
+        JOptionPane.showMessageDialog(this, "Roll No already exists.");
+        return;
+    }
+} catch (SQLException ex) {
+    ex.printStackTrace();
+    JOptionPane.showMessageDialog(this, "Error checking Roll No.");
+    return;
+}
+
+// Add student to database
+try {
+    Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/SCHOOL-DB", "username", "password");
+    PreparedStatement addStmt = conn.prepareStatement("INSERT INTO STUDENT-TABLE (Roll_No, Full_Name, Class, Birth_Date, Address, Enrollment_Date) VALUES (?, ?, ?, ?, ?, ?)");
+    addStmt.setString(1, rollNo);
+    addStmt.setString(2, fullName);
+    addStmt.setString(3, className);
+    addStmt.setString(4, birthDate);
+    addStmt.setString(5, address);
+    addStmt.setString(6, enrollmentDate);
+    int rowsInserted = addStmt.executeUpdate();
+    
+    if (rowsInserted > 0) {
+        JOptionPane.showMessageDialog(this, "Student added successfully.");
+        resetForm();
+    } else {
+        JOptionPane.showMessageDialog(this, "Error adding student.");
+    }
+} catch (SQLException ex) {
+    ex.printStackTrace();
+    JOptionPane.showMessageDialog(this, "Error adding student.");
+}
